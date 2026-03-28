@@ -38,7 +38,7 @@ const HeroSection = () => {
                 Explore All Offers
               </Link>
               <Link
-                href="/about"
+                href="/menu"
                 className="px-8 py-4 bg-white/10 backdrop-blur-md text-white border border-white/20 rounded-full font-bold text-lg hover:bg-white/20 hover:scale-105 transition-all"
               >
                 Explore Menu
