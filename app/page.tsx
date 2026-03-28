@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection"; 
 import MenuItemCard from "@/components/MenuItemCard";
 import { menuItems } from "@/data/menuData";
+import Footer from "@/components/Footer";
 
 export default function Home() {
 
@@ -50,6 +51,8 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      <Footer />
     </main>
 
   );
