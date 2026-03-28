@@ -5,13 +5,37 @@ import Image from "next/image"
 import { useState, useEffect } from "react"
 import { Menu, X, ChevronDown, User } from "lucide-react"
 
+// Define types
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: "user" | "admin";
+}
+
+interface MenuItem {
+  id: string;
+  title: string;
+  slug?: string;
+  description?: string;
+  price?: number;
+}
+
+interface OfferItem {
+  id: string;
+  title: string;
+  slug?: string;
+  description?: string;
+  discount?: number;
+}
+
 export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false)
-  const [user, setUser] = useState(null)
-  const [previewMenu, setPreviewMenu] = useState([])
-  const [previewOffers, setPreviewOffers] = useState([])
-  const [isOffersOpen, setIsOffersOpen] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false)
+  const [user, setUser] = useState<User | null>(null)
+  const [previewMenu, setPreviewMenu] = useState<MenuItem[]>([])
+  const [previewOffers, setPreviewOffers] = useState<OfferItem[]>([])
+  const [isOffersOpen, setIsOffersOpen] = useState<boolean>(false);
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
   useEffect(() => {
     // Basic session check + load offers, menu preview on mount
@@ -23,7 +47,7 @@ export default function Navbar() {
           return
         }
         const data = await res.json()
-        if (data.user) setUser(data.user)
+        if (data.user) setUser(data.user as User)
       } catch {
         // Silently ignore session check failures in the navbar
       }
@@ -109,7 +133,7 @@ export default function Navbar() {
                   {previewOffers.length === 0 ? (
                     <span className="col-span-2 text-xs text-stone-400">No offers available yet.</span>
                   ) : (
-                    previewOffers.map((item) => (
+                    previewOffers.map((item: OfferItem) => (
                       <Link
                         key={item.id}
                         href={`/offers/${item.slug || item.id}`}
@@ -151,7 +175,7 @@ export default function Navbar() {
                   {previewMenu.length === 0 ? (
                     <span className="col-span-2 text-xs text-stone-400">No menu items available yet.</span>
                   ) : (
-                    previewMenu.map((item) => (
+                    previewMenu.map((item: MenuItem) => (
                       <Link
                         key={item.id}
                         href={`/menu/${item.slug || item.id}`}
@@ -259,7 +283,7 @@ export default function Navbar() {
                 {previewOffers.length === 0 ? (
                   <span className="block text-xs text-stone-400 px-2 py-2">No offers available yet.</span>
                 ) : (
-                  previewOffers.map((item) => (
+                  previewOffers.map((item: OfferItem) => (
                     <Link
                       key={item.id}
                       href={`/offers/${item.slug || item.id}`}
@@ -295,7 +319,7 @@ export default function Navbar() {
                 {previewMenu.length === 0 ? (
                   <span className="block text-xs text-stone-400 px-2 py-2">No menu items available yet.</span>
                 ) : (
-                  previewMenu.map((item) => (
+                  previewMenu.map((item: MenuItem) => (
                     <Link
                       key={item.id}
                       href={`/menu/${item.slug || item.id}`}
