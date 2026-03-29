@@ -63,21 +63,21 @@ export default function Footer() {
   const contactInfo: ContactInfo[] = [
     { 
       icon: <MapPin className="h-5 w-5 text-amber-600" />, 
-      text: "123 Foodie Street, Culinary District, New York, NY 10001" 
+      text: "123 Foodie Street, Makawanpur District, Bagmati, BA 44100" 
     },
     { 
       icon: <Phone className="h-5 w-5 text-amber-600" />, 
-      text: "+1 (555) 123-4567",
-      href: "tel:+15551234567"
+      text: "+977 (057) 123-4567",
+      href: "tel:+9770571234567"
     },
     { 
       icon: <Mail className="h-5 w-5 text-amber-600" />, 
-      text: "hello@moodmeals.com",
-      href: "mailto:hello@moodmeals.com"
+      text: "contact@moodmeals.com",
+      href: "mailto:contact@moodmeals.com"
     },
     { 
       icon: <Clock className="h-5 w-5 text-amber-600" />, 
-      text: "Mon-Sun: 11:00 AM - 10:00 PM" 
+      text: "Sun-Fri: 11:00 AM - 10:00 PM" 
     },
   ]
 
@@ -99,8 +99,8 @@ export default function Footer() {
                 priority 
               />
               <span className="text-lg font-bold tracking-tight">
-                <span className="text-amber-500">MOOD</span>
-                <span className="text-green-500">MEALS</span>
+                <span className="text-amber-600">MOOD</span>
+                <span className="text-green-600">MEALS</span>
               </span>
             </Link>
             <p className="text-sm text-stone-400 leading-relaxed">
@@ -131,7 +131,7 @@ export default function Footer() {
                 <li key={link.name}>
                   <Link 
                     href={link.href}
-                    className="text-stone-400 hover:text-amber-500 transition-colors duration-200 flex items-center group"
+                    className="text-stone-400 hover:text-amber-600 transition-colors duration-200 flex items-center group"
                   >
                     <ChevronRight className="h-4 w-4 mr-1 opacity-0 group-hover:opacity-100 transition-opacity" />
                     {link.name}
@@ -151,7 +151,7 @@ export default function Footer() {
                   {info.href ? (
                     <a 
                       href={info.href}
-                      className="text-stone-400 hover:text-amber-500 transition-colors duration-200 text-sm"
+                      className="text-stone-400 hover:text-amber-600 transition-colors duration-200 text-sm"
                     >
                       {info.text}
                     </a>
@@ -185,18 +185,19 @@ export default function Footer() {
                 name="email"
                 required
                 placeholder="Enter your email"
-                className="w-full px-4 py-2.5 rounded-lg bg-stone-800 border border-stone-700 text-white placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-2.5 rounded-lg bg-stone-800 border border-stone-700 text-white placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-transparent transition-all"
               />
               <button
                 type="submit"
-                className="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2.5 rounded-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
+                className="group relative w-full bg-gradient-to-r from-amber-600 to-orange-600 text-white font-semibold py-2.5 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98]"
               >
-                Subscribe
+                <span className="relative z-10">Subscribe</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-amber-800 to-orange-800 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
               </button>
             </form>
             <p className="text-xs text-stone-500 mt-3">
               By subscribing, you agree to our{" "}
-              <Link href="/privacy" className="text-amber-500 hover:text-amber-400">
+              <Link href="/privacy" className="text-amber-600 hover:text-amber-400">
                 Privacy Policy
               </Link>
             </p>
@@ -217,7 +218,7 @@ export default function Footer() {
               <Link
                 key={link.name}
                 href={link.href}
-                className="text-sm text-stone-400 hover:text-amber-500 transition-colors duration-200"
+                className="text-sm text-stone-400 hover:text-amber-600 transition-colors duration-200"
               >
                 {link.name}
               </Link>
@@ -226,7 +227,7 @@ export default function Footer() {
           
           <div className="flex items-center space-x-1 text-sm text-stone-500">
             <span>Made with</span>
-            <Heart className="h-4 w-4 text-amber-500 fill-amber-500" />
+            <Heart className="h-4 w-4 text-amber-600 fill-amber-600" />
             <span>for food lovers</span>
           </div>
         </div>

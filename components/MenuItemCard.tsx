@@ -167,9 +167,21 @@ export default function MenuItemCard({
 
             <button
               onClick={handleAddToCart}
-              className="w-10 h-10 bg-amber-600 rounded-full flex items-center justify-center hover:bg-amber-700 transition-all hover:scale-110 cursor-pointer shadow-md"
+              className="group relative w-10 h-10 bg-gradient-to-r from-amber-600 to-orange-600 rounded-full flex items-center justify-center hover:scale-110 hover:shadow-xl transition-all duration-300 cursor-pointer shadow-md overflow-hidden"
             >
-              <ShoppingCart className="h-4 w-4 text-white" />
+              {/* Ripple effect background */}
+              <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+              
+              {/* Animated ring pulse */}
+              <div className="absolute inset-0 rounded-full border-2 border-amber-300 opacity-0 group-hover:opacity-100 group-hover:scale-150 transition-all duration-500"></div>
+              
+              {/* Cart icon with bounce effect */}
+              <ShoppingCart className="h-4 w-4 text-white relative z-10 transition-all duration-300 group-hover:scale-125 group-hover:rotate-12" />
+              
+              {/* Plus indicator for "add" action */}
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 scale-0 group-hover:scale-100 transition-all duration-300 delay-100">
+                +
+              </span>
             </button>
           </div>
         </div>

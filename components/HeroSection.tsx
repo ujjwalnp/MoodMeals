@@ -33,13 +33,14 @@ const HeroSection = () => {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 href="/offers"
-                className="px-8 py-4 bg-amber-600 text-white rounded-full font-bold text-lg hover:bg-amber-800 hover:scale-105 transition-all shadow-xl hover:shadow-amber-900/20"
+                className="group relative px-8 py-4 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-full font-bold text-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 overflow-hidden"
               >
-                Explore All Offers
+                <span className="relative z-10">Explore All Offers</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-amber-800 to-orange-800 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
               </Link>
               <Link
                 href="/menu"
-                className="px-8 py-4 bg-white/10 backdrop-blur-md text-white border border-white/20 rounded-full font-bold text-lg hover:bg-white/20 hover:scale-105 transition-all"
+                className="px-8 py-4 bg-white/10 backdrop-blur-md text-white rounded-full font-bold text-lg hover:bg-white/20 hover:scale-105 transition-all shadow-md border-2 border-amber-50/50 hover:border-amber-300"
               >
                 Explore Menu
               </Link>

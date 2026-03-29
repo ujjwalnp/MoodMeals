@@ -231,9 +231,10 @@ export default function Navbar() {
             ) : (
               <Link
                 href="/login"
-                className="bg-amber-600 text-white px-6 py-2.5 rounded-full font-semibold hover:bg-amber-700 transition-all shadow-md hover:shadow-lg"
+                className="group relative px-6 py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-full font-semibold hover:shadow-2xl hover:scale-105 transition-all duration-300 overflow-hidden"
               >
-                Sign In
+                <span className="relative z-10">Sign In</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-amber-800 to-orange-800 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
               </Link>
             )}
           </div>
@@ -378,10 +379,11 @@ export default function Navbar() {
             ) : (
               <Link 
                 href="/login" 
-                className="block text-center bg-amber-600 text-white py-3 rounded-xl font-bold"
+                className="group relative block text-center bg-gradient-to-r from-amber-600 to-orange-600 text-white py-3 rounded-xl font-bold overflow-hidden transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]"
                 onClick={() => setIsOpen(false)}
               >
-                Sign In
+                <span className="relative z-10">Sign In</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-amber-800 to-orange-800 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
               </Link>
             )}
           </div>
