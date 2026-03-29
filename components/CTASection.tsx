@@ -1,3 +1,6 @@
+
+"use client";
+
 import React from 'react';
 import Link from 'next/link';
 import { UtensilsCrossed, ChefHat, Pizza, Sparkles } from 'lucide-react';
