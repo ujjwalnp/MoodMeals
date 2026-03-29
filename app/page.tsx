@@ -7,6 +7,8 @@ import MenuItemCard from "@/components/MenuItemCard";
 import { menuItems } from "@/data/menuData";
 import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
+import ReviewSection from "@/components/ReviewSection";
+import { featuredReviews, reviewStats } from "@/data/reviewData";
 
 export default function Home() {
 
@@ -52,6 +54,13 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      {/* Review Section - Pass reviews as props similar to MenuItemCard */}
+      <ReviewSection 
+        reviews={featuredReviews}
+        totalReviews={reviewStats.totalReviews}
+        averageRating={reviewStats.averageRating}
+      />
         
       <CTASection />
       <Footer />
