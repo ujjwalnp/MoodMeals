@@ -1,9 +1,9 @@
-
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import MenuItemCard from "@/components/MenuItemCard";
+import OfferItem from "@/components/card/OfferItem";
+import { useMemo } from "react";
 
-interface MenuItem {
+interface OfferItem {
   id: string;
   name: string;
   description: string;
@@ -18,10 +18,15 @@ interface MenuItem {
 }
 
 interface FeaturedOffersProps {
-  offers: MenuItem[];
+  offers: OfferItem[];
 }
 
 const FeaturedOffers = ({ offers }: FeaturedOffersProps) => {
+  // Filter only items with discount
+  const offerItems = useMemo(() => {
+    return offers.filter(item => item.isDiscount === true && item.discountedPrice);
+  }, [offers]);
+
   return (
     <section className="py-24 px-4 max-w-7xl mx-auto">
       <div className="text-center mb-12">
@@ -36,8 +41,8 @@ const FeaturedOffers = ({ offers }: FeaturedOffersProps) => {
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {offers.map((item, index) => (
-          <MenuItemCard
+        {offerItems.map((item, index) => (
+          <OfferItem
             key={item.id}
             id={item.id}
             name={item.name}
@@ -56,14 +61,14 @@ const FeaturedOffers = ({ offers }: FeaturedOffersProps) => {
       </div>
 
       {/* Load More Button */}
-    <div className="mt-8 text-center">
+      <div className="mt-8 text-center">
         <Link href="/offers">
-        <button className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white border-2 border-amber-700 text-amber-700 font-semibold hover:bg-amber-700 hover:text-white transition-all duration-300">
+          <button className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white border-2 border-amber-700 text-amber-700 font-semibold hover:bg-amber-700 hover:text-white transition-all duration-300">
             Load More Offers
             <ArrowRight className="h-4 w-4" />
-        </button>
+          </button>
         </Link>
-    </div>
+      </div>
     </section>
   );
 };

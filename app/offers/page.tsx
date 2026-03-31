@@ -5,8 +5,8 @@ import { useState, useEffect, useMemo } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { menuItems } from "@/data/menuData";
-import MenuItemCard from "@/components/MenuItemCard";
-import { Star, ArrowUpDown, Clock, ShoppingCart } from "lucide-react";
+import OfferItem from "@/components/card/OfferItem";
+import { ArrowUpDown } from "lucide-react";
 
 export default function OffersPage() {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -98,125 +98,6 @@ export default function OffersPage() {
     return (totalDiscountPercent / offerItems.length).toFixed(1);
   };
 
-  // Custom wrapper to modify the price section
-  const OfferMenuItemCard = (props: any) => {
-    const discountPercent = ((props.price - (props.discountedPrice || props.price)) / props.price) * 100;
-    
-    return (
-      <div className="relative group">
-        <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-stone-100">
-          {/* Image Section - Same as original */}
-          <div className="relative h-56 overflow-hidden bg-stone-100">
-            <img
-              src={props.image || "/placeholder-food.jpg"}
-              alt={props.name}
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-            />
-            
-            {/* Popularity Tag */}
-            {props.popularityTag && (
-              <div className={`absolute top-3 left-3 ${
-                props.popularityTag === "popular" ? "bg-orange-500" :
-                props.popularityTag === "chef-special" ? "bg-amber-600" :
-                props.popularityTag === "trending" ? "bg-blue-500" :
-                props.popularityTag === "bestseller" ? "bg-yellow-600" : "bg-rose-500"
-              } text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-md`}>
-                <span>{
-                  props.popularityTag === "popular" ? "🔥" :
-                  props.popularityTag === "chef-special" ? "👨‍🍳" :
-                  props.popularityTag === "trending" ? "📈" :
-                  props.popularityTag === "bestseller" ? "🏆" : "❤️"
-                }</span>
-                <span>{
-                  props.popularityTag === "popular" ? "Popular" :
-                  props.popularityTag === "chef-special" ? "Chef's Special" :
-                  props.popularityTag === "trending" ? "Trending" :
-                  props.popularityTag === "bestseller" ? "Bestseller" : "Fan Favorite"
-                }</span>
-              </div>
-            )}
-            
-            {/* Veg/Non-Veg Tag */}
-            <div className={`absolute top-3 right-3 ${props.isVeg ? "bg-green-600" : "bg-red-600"} text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-md`}>
-              <span>{props.isVeg ? "🥬" : "🍗"}</span>
-              <span>{props.isVeg ? "Veg" : "Non-Veg"}</span>
-            </div>
-          </div>
-
-          <div className="p-5">
-            <h4 className="text-xl font-bold text-stone-900 mb-2 group-hover:text-amber-600 transition-colors line-clamp-1">
-              {props.name}
-            </h4>
-
-            <div className="flex items-center gap-2 mb-3">
-              <div className="flex items-center gap-0.5">
-                <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
-                <span className="text-sm font-semibold text-stone-900">{props.rating.toFixed(1)}</span>
-              </div>
-              <span className="text-xs text-stone-400">•</span>
-              <div className="flex items-center gap-1">
-                <Clock className="h-3 w-3 text-stone-400" />
-                <span className="text-xs text-stone-500">{props.preparationTime} mins</span>
-              </div>
-            </div>
-
-            <p className="text-stone-500 text-sm mb-4 line-clamp-2">
-              {props.description}
-            </p>
-
-            {/* Price Section with Discount Tag */}
-            <div className="flex items-center justify-between pt-4 border-t border-stone-100">
-              <div className="flex items-center gap-3">
-                {/* Price */}
-                <div>
-                  {props.isDiscount && props.discountedPrice ? (
-                    <div>
-                      <span className="text-xs text-stone-400 line-through block">
-                        NPR {props.price.toFixed(2)}
-                      </span>
-                      <span className="text-2xl font-black text-amber-600">
-                        NPR {props.discountedPrice.toFixed(2)}
-                      </span>
-                    </div>
-                  ) : (
-                    <span className="text-2xl font-black text-amber-600">
-                      NPR {props.price.toFixed(2)}
-                    </span>
-                  )}
-                </div>
-
-                {/* Discount Tag - Next to Price */}
-                <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-orange-500 rounded-full blur-md opacity-60 group-hover:opacity-100 transition-opacity animate-pulse"></div>
-                  <div className="relative bg-gradient-to-r from-red-600 to-orange-600 text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg transform hover:scale-110 transition-all duration-300">
-                    <span className="text-sm">🏷️</span>
-                    <span>{discountPercent.toFixed(0)}% OFF</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Add to Cart Button */}
-              <button
-                onClick={() => {
-                  const { addToCart } = require("@/context/CartContext").useCart();
-                  addToCart(props.id, props.name, 1, props.discountedPrice || props.price);
-                }}
-                className="group relative w-10 h-10 bg-gradient-to-r from-amber-600 to-orange-600 rounded-full flex items-center justify-center hover:scale-110 hover:shadow-xl transition-all duration-300 cursor-pointer shadow-md overflow-hidden"
-              >
-                <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-                <div className="absolute inset-0 rounded-full border-2 border-amber-300 opacity-0 group-hover:opacity-100 group-hover:scale-150 transition-all duration-500"></div>
-                <ShoppingCart className="h-4 w-4 text-white relative z-10 transition-all duration-300 group-hover:scale-125 group-hover:rotate-12" />
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 scale-0 group-hover:scale-100 transition-all duration-300 delay-100">
-                  +
-                </span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   return (
     <>
       <Navbar />
@@ -279,7 +160,7 @@ export default function OffersPage() {
             {/* Category Pills with Sort Dropdown */}
             <div className="flex flex-wrap items-center justify-center gap-3 mb-10">
               <div className="flex flex-wrap justify-center gap-2">
-                {categories.map((category, idx) => (
+                {categories.map((category) => (
                   <button
                     key={category.id}
                     onClick={() => setSelectedCategory(category.id)}
@@ -328,7 +209,7 @@ export default function OffersPage() {
                 }`}
                 style={{ transitionDelay: `${index * 100}ms` }}
               >
-                <OfferMenuItemCard {...item} index={index} />
+                <OfferItem {...item} index={index} />
               </div>
             ))}
           </div>
@@ -412,68 +293,3 @@ export default function OffersPage() {
     </>
   );
 }
-
-// Don't forget to import these at the top:
-// import { Clock, ShoppingCart } from "lucide-react"
-
-// API Call Code (commented for now - uncomment when backend is ready)
-/*
-"use client";
-
-import { useState, useEffect, useMemo } from "react";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import MenuItemCard from "@/components/MenuItemCard";
-import { Sparkles, Flame, Crown, TrendingUp, Heart, Star, ArrowUpDown } from "lucide-react";
-
-export default function OffersPage() {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [sortBy, setSortBy] = useState<string>("default");
-  const [menuItems, setMenuItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [navbarHeight, setNavbarHeight] = useState(0);
-
-  useEffect(() => {
-    setIsLoaded(true);
-    
-    const navbar = document.querySelector('nav');
-    if (navbar) {
-      setNavbarHeight(navbar.offsetHeight);
-    }
-    
-    // Fetch menu items from API
-    fetch("/api/menu")
-      .then(res => res.json())
-      .then(data => {
-        setMenuItems(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Error fetching menu:", err);
-        setLoading(false);
-      });
-  }, []);
-
-  // Filter only items with discount
-  const offerItems = useMemo(() => {
-    return menuItems.filter(item => item.isDiscount === true && item.discountedPrice);
-  }, [menuItems]);
-
-  if (loading) {
-    return (
-      <>
-        <Navbar />
-        <div className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-amber-50 flex items-center justify-center">
-          <div className="text-center">
-            <div className="text-6xl animate-bounce mb-4">🏷️</div>
-            <p className="text-stone-600 text-lg">Loading amazing offers...</p>
-          </div>
-        </div>
-      </>
-    );
-  }
-
-  // ... rest of the component logic (same as above with offerItems from state)
-}
-*/
