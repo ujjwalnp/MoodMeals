@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { menuItems } from "@/data/menuData";
-import MenuItemCard from "@/components/MenuItemCard";
+import MenuItemCard from "@/components/card/MenuItem";
 import { 
   Sparkles, Flame, Crown, TrendingUp, Heart, Star, 
   Search, X, Filter, ArrowUpDown, DollarSign, Star as StarIcon,

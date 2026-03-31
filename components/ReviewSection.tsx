@@ -17,7 +17,7 @@ import {
   Coffee,
   CheckCircle
 } from "lucide-react";
-import ReviewCard from "./ReviewCard";
+import ReviewCard from "./card/Review";
 import { Review, reviewStats, availableTags } from "@/data/reviewData";
 
 // Tag configuration for icons and colors

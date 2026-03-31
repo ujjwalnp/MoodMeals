@@ -2,12 +2,12 @@
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection"; 
 import { menuItems } from "@/data/menuData";
-import CTASection from "@/components/CTASection";
+import CTASection from "@/components/card/CTASection";
 import Footer from "@/components/Footer";
 import ReviewSection from "@/components/ReviewSection";
 import { featuredReviews, reviewStats } from "@/data/reviewData";
 import FeaturedOffers from "@/components/FeaturedOffers";
-import FoodOrderFlow from "@/components/FoodOrderFlow";
+import FoodOrderFlow from "@/components/card/FoodOrderFlow";
 
 export default function Home() {
 
