@@ -2,7 +2,7 @@
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection"; 
 import { menuItems } from "@/data/menuData";
-import CTASection from "@/components/card/CTASection";
+import CTASection from "@/components/card/CTA";
 import Footer from "@/components/Footer";
 import ReviewSection from "@/components/ReviewSection";
 import { featuredReviews, reviewStats } from "@/data/reviewData";
