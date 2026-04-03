@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Image from "next/image"
 import { Plus, Minus, ShoppingCart, Star, Clock } from "lucide-react"
-import { useCart } from "@/context/CartContext"
+import { useCart } from "@/context/Cart"
 
 interface MenuItemCardProps {
   id: string

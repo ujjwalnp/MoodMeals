@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { ShoppingCart, Star, Clock, Gift, Plus, Minus } from "lucide-react";
-import { useCart } from "@/context/CartContext";
+import { useCart } from "@/context/Cart";
 
 interface OfferItemProps {
   id: string;
