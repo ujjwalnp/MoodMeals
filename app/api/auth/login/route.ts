@@ -41,7 +41,7 @@ export async function POST(req: Request) {
                 email: user.email,
                 name: user.name,
                 role: user.role,
-            }
+            }, message: "Login successful",
         })
 
 

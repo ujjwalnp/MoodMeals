@@ -3,20 +3,15 @@
 import { useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import type { User } from "@/generated/prisma/client";
 
-// Define types for user data
-interface User {
-  id: string
-  name: string
-  email: string
-  role: "user" | "admin"
-}
+type SafeUser = Omit<User, "password" | "createdAt" | "updatedAt">
 
 // Define API response type
 interface LoginResponse {
   error?: string
   message?: string
-  user?: User
+  user?: SafeUser
 }
 
 export default function LoginPage() {
@@ -51,7 +46,7 @@ export default function LoginPage() {
 
       const data: LoginResponse = await res.json()
       if (res.ok) {
-        if (data.user?.role === "admin") {
+        if (data.user?.role === "ADMIN") {
           router.push("/admin")
         } else {
           router.push("/")
