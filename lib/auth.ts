@@ -12,3 +12,19 @@ export async function generateToken(user: User) {
         role: user.role,
     }, JWT_SECRET, { expiresIn: "7d" })
 }
+
+export async function getSession() {
+    try {
+        const cookieStore = await cookies();
+
+        const token = cookieStore.get("auth_token")?.value;
+        if (!token) {
+            return { user: null, error: "No token found" };
+        }
+
+        return jwt.verify(token, JWT_SECRET);
+    } catch (error) {
+        console.error("[moodmeals][auth][session] Error: ", error);
+        return { user: null, error: "Failed to retrieve session" };
+    }
+}

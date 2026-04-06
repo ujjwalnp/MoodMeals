@@ -9,7 +9,7 @@ export async function POST() {
         const cookieStore = await cookies();
         cookieStore.delete("auth_token");
 
-        return NextResponse.json({ message: "Logout successful" });
+        return NextResponse.json({ message: "Logout successful" }, { status: 200 });
     } catch (error) {
         console.error("[moodmeals][auth][logout] Error: ", error);
         return NextResponse.json({ error: "Logout failed" }, { status: 500 });
