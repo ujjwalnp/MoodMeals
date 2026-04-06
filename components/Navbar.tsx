@@ -27,6 +27,7 @@ interface OfferItem {
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState<boolean>(true)
   const [previewMenu, setPreviewMenu] = useState<MenuItem[]>([])
   const [previewOffers, setPreviewOffers] = useState<OfferItem[]>([])
   const [isOffersOpen, setIsOffersOpen] = useState<boolean>(false)
@@ -46,6 +47,8 @@ export default function Navbar() {
         }
       } catch {
         setUser(null)
+      } finally {
+        setLoading(false)
       }
     }
 
@@ -79,7 +82,7 @@ export default function Navbar() {
   const handleLogout = async () => {
     try {
       await fetch("/api/auth/logout", { method: "POST" })
-      window.location.href = "/login"
+      window.location.href = "/"
     } catch (err) {
       console.error("Logout failed:", err)
     }
@@ -195,51 +198,55 @@ export default function Navbar() {
           
           {/* Desktop User Actions (Cart + Auth) */}
           <div className="hidden md:flex items-center space-x-6">
-            {user ? (
-              <div className="flex items-center space-x-6">
-                {/* Cart Icon */}
-                <Link href="/cart" className="text-stone-600 hover:text-amber-600 transition-colors">
-                  <ShoppingCart  className="h-6 w-6" />
-                </Link>
+            {!loading && (
+              <>
+                {user ? (
+                  <div className="flex items-center space-x-6">
+                    {/* Cart Icon */}
+                    <Link href="/cart" className="text-stone-600 hover:text-amber-600 transition-colors">
+                      <ShoppingCart  className="h-6 w-6" />
+                    </Link>
 
-                {/* User Dropdown */}
-                <div className="relative group">
-                  <button className="flex items-center space-x-2 text-stone-700 font-medium group-hover:text-amber-600 transition-colors">
-                    <div className="w-8 h-8 bg-stone-100 rounded-full flex items-center justify-center">
-                      <User className="h-5 w-5 text-stone-600" />
+                    {/* User Dropdown */}
+                    <div className="relative group">
+                      <button className="flex items-center space-x-2 text-stone-700 font-medium group-hover:text-amber-600 transition-colors">
+                        <div className="w-8 h-8 bg-stone-100 rounded-full flex items-center justify-center">
+                          <User className="h-5 w-5 text-stone-600" />
+                        </div>
+                        <span>{user.name}</span>
+                        <ChevronDown className="h-4 w-4" />
+                      </button>
+
+                      <div className="absolute right-0 mt-2 w-48 bg-white border border-stone-100 shadow-xl rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 py-2">
+                        <Link href={user.role === "ADMIN" ? "/admin" : "/profile"} className="block px-4 py-2 text-sm text-stone-600 hover:bg-stone-50 hover:text-amber-600">
+                          Profile
+                        </Link>
+                        <Link href="/orders" className="block px-4 py-2 text-sm text-stone-600 hover:bg-stone-50 hover:text-amber-600">
+                          My Orders
+                        </Link>
+                        <Link href="/orders/track" className="block px-4 py-2 text-sm text-stone-600 hover:bg-stone-50 hover:text-amber-600">
+                          Track Orders
+                        </Link>
+                        <hr className="my-1 border-stone-100" />
+                        <button 
+                          onClick={handleLogout}
+                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                        >
+                          Logout
+                        </button>
+                      </div>
                     </div>
-                    <span>{user.name}</span>
-                    <ChevronDown className="h-4 w-4" />
-                  </button>
-
-                  <div className="absolute right-0 mt-2 w-48 bg-white border border-stone-100 shadow-xl rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 py-2">
-                    <Link href={user.role === "ADMIN" ? "/admin" : "/profile"} className="block px-4 py-2 text-sm text-stone-600 hover:bg-stone-50 hover:text-amber-600">
-                      Profile
-                    </Link>
-                    <Link href="/orders" className="block px-4 py-2 text-sm text-stone-600 hover:bg-stone-50 hover:text-amber-600">
-                      My Orders
-                    </Link>
-                    <Link href="/orders/track" className="block px-4 py-2 text-sm text-stone-600 hover:bg-stone-50 hover:text-amber-600">
-                      Track Orders
-                    </Link>
-                    <hr className="my-1 border-stone-100" />
-                    <button 
-                      onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                    >
-                      Logout
-                    </button>
                   </div>
-                </div>
-              </div>
-            ) : (
-              <Link
-                href="/login"
-                className="group relative px-6 py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-full font-semibold hover:shadow-2xl hover:scale-105 transition-all duration-300 overflow-hidden"
-              >
-                <span className="relative z-10">Sign In</span>
-                <div className="absolute inset-0 bg-gradient-to-r from-amber-800 to-orange-800 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
-              </Link>
+                ) : (
+                  <Link
+                    href="/login"
+                    className="group relative px-6 py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-full font-semibold hover:shadow-2xl hover:scale-105 transition-all duration-300 overflow-hidden"
+                  >
+                    <span className="relative z-10">Sign In</span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-amber-800 to-orange-800 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+                  </Link>
+                )}
+              </>
             )}
           </div>
 
