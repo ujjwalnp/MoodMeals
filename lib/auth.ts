@@ -19,12 +19,12 @@ export async function getSession() {
 
         const token = cookieStore.get("auth_token")?.value;
         if (!token) {
-            return { user: null, error: "No token found" };
+            return null;
         }
 
         return jwt.verify(token, JWT_SECRET);
     } catch (error) {
         console.error("[moodmeals][auth][session] Error: ", error);
-        return { user: null, error: "Failed to retrieve session" };
+        return null;
     }
 }

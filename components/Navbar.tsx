@@ -3,15 +3,10 @@
 import Link from "next/link"
 import Image from "next/image"
 import { useState, useEffect } from "react"
-import { Menu, X, ChevronDown, User } from "lucide-react"
+import { Menu, X, ChevronDown, User, ShoppingCart  } from "lucide-react"
+import type { User as UserType } from "@/generated/prisma/client"
 
-// Define types
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: "user" | "admin";
-}
+type User = Omit<UserType, "password" | "createdAt" | "updatedAt">
 
 interface MenuItem {
   id: string;
@@ -34,22 +29,23 @@ export default function Navbar() {
   const [user, setUser] = useState<User | null>(null)
   const [previewMenu, setPreviewMenu] = useState<MenuItem[]>([])
   const [previewOffers, setPreviewOffers] = useState<OfferItem[]>([])
-  const [isOffersOpen, setIsOffersOpen] = useState<boolean>(false);
-  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+  const [isOffersOpen, setIsOffersOpen] = useState<boolean>(false)
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false)
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState<boolean>(false)
 
   useEffect(() => {
-    // Basic session check + load offers, menu preview on mount
     const checkSession = async () => {
       try {
         const res = await fetch("/api/auth/session", { cache: "no-store" })
-        if (!res.ok) {
-          // If session check fails (e.g., not logged in), just treat as no user
-          return
-        }
         const data = await res.json()
-        if (data.user) setUser(data.user as User)
+
+        if (res.ok && data.user) {
+          setUser(data.user as User)
+        } else {
+          setUser(null)
+        }
       } catch {
-        // Silently ignore session check failures in the navbar
+        setUser(null)
       }
     }
 
@@ -80,6 +76,15 @@ export default function Navbar() {
     loadPreviewMenu()
   }, [])
 
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" })
+      window.location.href = "/login"
+    } catch (err) {
+      console.error("Logout failed:", err)
+    }
+  }
+
   return (
     <nav className="fixed w-full z-50 bg-white/80 backdrop-blur-md border-b border-stone-200">
       <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
@@ -101,22 +106,18 @@ export default function Navbar() {
             </span>
           </Link>
 
+          {/* Desktop Navigation Links */}
           <div className="hidden md:flex items-center space-x-8">
-
-            {/* Desktop-specific Home link */}
             <Link href="/" className="text-stone-600 hover:text-amber-600 font-medium transition-colors">
               Home
             </Link>
 
-            {/* Desktop-specific About link */}
             <Link href="/about" className="text-stone-600 hover:text-amber-600 font-medium transition-colors">
               About
             </Link>
     
-            {/* Desktop-specific offers dropdown with preview */}
+            {/* Desktop Offers Dropdown */}
             <div className="relative group">
-
-              {/* Desktop dropdown trigger */}
               <Link
                 href="/offers"
                 className="flex items-center text-stone-600 group-hover:text-amber-600 font-medium transition-colors"
@@ -124,7 +125,6 @@ export default function Navbar() {
                 Offers <ChevronDown className="ml-1 h-4 w-4" />
               </Link>
 
-              {/* Desktop dropdown with featured offers items preview */}
               <div className="absolute top-full left-0 mt-2 w-[420px] bg-white border border-stone-100 shadow-xl rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                 <div className="px-4 py-3 border-b border-stone-100 text-xs font-semibold text-stone-500 uppercase tracking-wider">
                   Featured Offers
@@ -145,20 +145,15 @@ export default function Navbar() {
                   )}
                 </div>
                 <div className="px-4 py-3 border-t border-stone-100">
-                  <Link
-                    href="/offers"
-                    className="text-xs font-semibold text-amber-600 hover:text-amber-700"
-                  >
+                  <Link href="/offers" className="text-xs font-semibold text-amber-600 hover:text-amber-700">
                     View all offers →
                   </Link>
                 </div>
               </div>
             </div>
 
-            {/* Desktop-specific menu dropdown with preview */}
+            {/* Desktop Menu Dropdown */}
             <div className="relative group">
-
-              {/* Desktop dropdown trigger */}
               <Link
                 href="/menu"
                 className="flex items-center text-stone-600 group-hover:text-amber-600 font-medium transition-colors"
@@ -166,7 +161,6 @@ export default function Navbar() {
                 Menu <ChevronDown className="ml-1 h-4 w-4" />
               </Link>
 
-              {/* Desktop dropdown with featured menu items preview */}
               <div className="absolute top-full left-0 mt-2 w-[420px] bg-white border border-stone-100 shadow-xl rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                 <div className="px-4 py-3 border-b border-stone-100 text-xs font-semibold text-stone-500 uppercase tracking-wider">
                   Featured Menu Items
@@ -187,46 +181,56 @@ export default function Navbar() {
                   )}
                 </div>
                 <div className="px-4 py-3 border-t border-stone-100">
-                  <Link
-                    href="/menu"
-                    className="text-xs font-semibold text-amber-600 hover:text-amber-700"
-                  >
+                  <Link href="/menu" className="text-xs font-semibold text-amber-600 hover:text-amber-700">
                     View all menu items →
                   </Link>
                 </div>
               </div>
             </div>
 
-            {/* Contact link */}
             <Link href="/contact" className="text-stone-600 hover:text-amber-600 font-medium transition-colors">
               Contact
             </Link>
           </div>
           
-          {/* Desktop user auth links */}
-          <div className="hidden md:flex items-center space-x-4">
+          {/* Desktop User Actions (Cart + Auth) */}
+          <div className="hidden md:flex items-center space-x-6">
             {user ? (
-              <div className="flex items-center space-x-4">
-                <Link
-                  href={user.role === "admin" ? "/admin" : "/profile"}
-                  className="flex items-center space-x-2 text-stone-700 font-medium"
-                >
-                  <User className="h-5 w-5" />
-                  <span>{user.name}</span>
+              <div className="flex items-center space-x-6">
+                {/* Cart Icon */}
+                <Link href="/cart" className="text-stone-600 hover:text-amber-600 transition-colors">
+                  <ShoppingCart  className="h-6 w-6" />
                 </Link>
-                <button
-                  onClick={async () => {
-                    try {
-                      await fetch("/api/auth/logout", { method: "POST" })
-                      window.location.href = "/login"
-                    } catch (err) {
-                      console.error("Logout failed:", err)
-                    }
-                  }}
-                  className="text-stone-500 hover:text-stone-900 text-sm font-medium"
-                >
-                  Logout
-                </button>
+
+                {/* User Dropdown */}
+                <div className="relative group">
+                  <button className="flex items-center space-x-2 text-stone-700 font-medium group-hover:text-amber-600 transition-colors">
+                    <div className="w-8 h-8 bg-stone-100 rounded-full flex items-center justify-center">
+                      <User className="h-5 w-5 text-stone-600" />
+                    </div>
+                    <span>{user.name}</span>
+                    <ChevronDown className="h-4 w-4" />
+                  </button>
+
+                  <div className="absolute right-0 mt-2 w-48 bg-white border border-stone-100 shadow-xl rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 py-2">
+                    <Link href={user.role === "ADMIN" ? "/admin" : "/profile"} className="block px-4 py-2 text-sm text-stone-600 hover:bg-stone-50 hover:text-amber-600">
+                      Profile
+                    </Link>
+                    <Link href="/orders" className="block px-4 py-2 text-sm text-stone-600 hover:bg-stone-50 hover:text-amber-600">
+                      My Orders
+                    </Link>
+                    <Link href="/orders/track" className="block px-4 py-2 text-sm text-stone-600 hover:bg-stone-50 hover:text-amber-600">
+                      Track Orders
+                    </Link>
+                    <hr className="my-1 border-stone-100" />
+                    <button 
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                </div>
               </div>
             ) : (
               <Link
@@ -239,7 +243,7 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Mobile menu button */}
+          {/* Mobile menu toggle button */}
           <div className="md:hidden flex items-center shrink-0">
             <button onClick={() => setIsOpen(!isOpen)} className="text-stone-900 p-1.5 touch-manipulation">
               {isOpen ? <X className="h-5 w-5 sm:h-6 sm:w-6" /> : <Menu className="h-5 w-5 sm:h-6 sm:w-6" />}
@@ -248,29 +252,19 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Sidebar/Menu Content */}
       {isOpen && (
         <div className="md:hidden bg-white border-b border-stone-200 py-4 px-4 space-y-4 max-h-[calc(100vh-4rem)] overflow-y-auto">
           
-          {/* Mobile-specific Home link */}
-          <Link 
-            href="/" 
-            className="block text-stone-900 font-medium py-2"
-            onClick={() => setIsOpen(false)}
-          >
+          <Link href="/" className="block text-stone-900 font-medium py-2" onClick={() => setIsOpen(false)}>
             Home
           </Link>
 
-          {/* Mobile-specific About link */}
-          <Link 
-            href="/about" 
-            className="block text-stone-900 font-medium py-2"
-            onClick={() => setIsOpen(false)}
-          >
+          <Link href="/about" className="block text-stone-900 font-medium py-2" onClick={() => setIsOpen(false)}>
             About
           </Link>
 
-          {/* Mobile-specific offers dropdown */}
+          {/* Mobile Offers Dropdown */}
           <div className="space-y-2">
             <button
               onClick={() => setIsOffersOpen((prev) => !prev)}
@@ -295,18 +289,14 @@ export default function Navbar() {
                     </Link>
                   ))
                 )}
-                <Link
-                  href="/offers"
-                  className="block px-3 py-2 text-sm font-semibold text-amber-600 hover:text-amber-700"
-                  onClick={() => setIsOpen(false)}
-                >
+                <Link href="/offers" className="block px-3 py-2 text-sm font-semibold text-amber-600" onClick={() => setIsOpen(false)}>
                   View all offers →
                 </Link>
               </div>
             )}
           </div>
 
-          {/* Mobile-specific menu dropdown */}
+          {/* Mobile Menu Dropdown */}
           <div className="space-y-2">
             <button
               onClick={() => setIsMenuOpen((prev) => !prev)}
@@ -331,55 +321,56 @@ export default function Navbar() {
                     </Link>
                   ))
                 )}
-                <Link
-                  href="/menu"
-                  className="block px-3 py-2 text-sm font-semibold text-amber-600 hover:text-amber-700"
-                  onClick={() => setIsOpen(false)}
-                >
+                <Link href="/menu" className="block px-3 py-2 text-sm font-semibold text-amber-600" onClick={() => setIsOpen(false)}>
                   View all menu items →
                 </Link>
               </div>
             )}
           </div>
 
-          {/* Contact link */}
-          <Link 
-            href="/contact" 
-            className="block text-stone-900 font-medium py-2"
-            onClick={() => setIsOpen(false)}
-          >
+          <Link href="/contact" className="block text-stone-900 font-medium py-2" onClick={() => setIsOpen(false)}>
             Contact
           </Link>
 
-           {/* User auth links */}
+          {/* Mobile User Section */}
           <div className="pt-4 border-t border-stone-100">
             {user ? (
-              <>
+              <div className="space-y-2">
+                {/* Mobile Cart Link */}
                 <Link 
-                  href={user.role === "admin" ? "/admin" : "/profile"}
-                  className="block text-amber-600 font-bold py-2"
+                  href="/cart" 
+                  className="flex items-center space-x-2 text-stone-900 font-medium py-2"
                   onClick={() => setIsOpen(false)}
                 >
-                  My Profile
+                  <ShoppingCart  className="h-5 w-5 text-amber-600" />
+                  <span>My Cart</span>
                 </Link>
+
+                {/* Mobile User Sub-menu */}
                 <button
-                  onClick={async () => {
-                    try {
-                      await fetch("/api/auth/logout", { method: "POST" })
-                      window.location.href = "/login"
-                    } catch (err) {
-                      console.error("Logout failed:", err)
-                    }
-                  }}
-                  className="block w-full text-left text-stone-500 hover:text-stone-900 font-medium py-2"
+                  onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                  className="w-full flex items-center justify-between text-stone-900 font-medium py-2"
                 >
-                  Logout
+                  <div className="flex items-center space-x-2">
+                    <User className="h-5 w-5 text-amber-600" />
+                    <span>{user.name}</span>
+                  </div>
+                  <ChevronDown className={`h-4 w-4 transition-transform ${isUserDropdownOpen ? "rotate-180" : ""}`} />
                 </button>
-              </>
+                
+                {isUserDropdownOpen && (
+                  <div className="bg-stone-50 rounded-xl p-2 space-y-1 border border-stone-100">
+                    <Link href={user.role === "ADMIN" ? "/admin" : "/profile"} className="block px-4 py-2 text-sm text-stone-700" onClick={() => setIsOpen(false)}>Profile</Link>
+                    <Link href="/orders" className="block px-4 py-2 text-sm text-stone-700" onClick={() => setIsOpen(false)}>My Orders</Link>
+                    <Link href="/orders/track" className="block px-4 py-2 text-sm text-stone-700" onClick={() => setIsOpen(false)}>Track Orders</Link>
+                    <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-sm text-red-600 font-medium">Logout</button>
+                  </div>
+                )}
+              </div>
             ) : (
               <Link 
                 href="/login" 
-                className="group relative block text-center bg-gradient-to-r from-amber-600 to-orange-600 text-white py-3 rounded-xl font-bold overflow-hidden transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]"
+                className="group relative block text-center bg-gradient-to-r from-amber-600 to-orange-600 text-white py-3 rounded-xl font-bold overflow-hidden"
                 onClick={() => setIsOpen(false)}
               >
                 <span className="relative z-10">Sign In</span>
