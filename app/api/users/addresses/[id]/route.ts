@@ -44,7 +44,10 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(
+  request: Request, 
+  { params }: { params: Promise<{ id: string }> } // Note: params is a Promise now
+) {
   try {
     const session = (await getSession()) as Session | null;
     if (!session?.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -52,13 +55,24 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     const user = await prisma.user.findUnique({ where: { email: session.email }, select: { id: true } });
     if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-    const { id } = params;
+    // --- THE CRITICAL FIX ---
+    const { id } = await params; 
+    // ------------------------
+
+    if (!id) {
+      return NextResponse.json({ error: "Address ID is missing" }, { status: 400 });
+    }
 
     const deleted = await prisma.address.deleteMany({
-      where: { id, userId: user.id },
+      where: { 
+        id: id,      
+        userId: user.id 
+      },
     });
 
-    if (deleted.count === 0) return NextResponse.json({ error: "Address not found or not yours" }, { status: 404 });
+    if (deleted.count === 0) {
+      return NextResponse.json({ error: "Address not found or not yours" }, { status: 404 });
+    }
 
     return NextResponse.json({ message: "Address deleted successfully" }, { status: 200 });
   } catch (error) {
