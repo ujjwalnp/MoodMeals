@@ -3,16 +3,32 @@
 import { useState, useEffect, useMemo } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { menuItems } from "@/data/menuData";
 import MenuItemCard from "@/components/card/MenuItem";
 import { 
-  Sparkles, Flame, Crown, TrendingUp, Heart, Star, 
   Search, X, Filter, ArrowUpDown, DollarSign, Star as StarIcon,
-  Clock, Zap, ChefHat, Award, ThumbsUp, SlidersHorizontal
+  Clock, Zap, SlidersHorizontal, Loader2
 } from "lucide-react";
+
+interface MenuItem {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  discountedPrice?: number;
+  isDiscount: boolean;
+  preparationTime: number;
+  popularityTag: string | null;
+  rating: number;
+  isVeg: boolean;
+  image: string | null;
+  isAvailable: boolean;
+  slug: string;
+}
 
 export default function MenuPage() {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [showVegOnly, setShowVegOnly] = useState(false);
@@ -31,26 +47,54 @@ export default function MenuPage() {
     if (navbar) {
       setNavbarHeight(navbar.offsetHeight);
     }
+    
+    // Fetch menu items from API
+    fetchMenuItems();
   }, []);
 
+  const fetchMenuItems = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch("/api/admin/menu");
+      if (!response.ok) throw new Error("Failed to fetch menu");
+      const data = await response.json();
+      
+      // Filter only available items for frontend
+      const availableItems = data.filter((item: MenuItem) => item.isAvailable);
+      setMenuItems(availableItems);
+      
+      // Set max price range based on actual data
+      if (availableItems.length > 0) {
+        const maxPrice = Math.max(...availableItems.map((item: MenuItem) => 
+          item.isDiscount && item.discountedPrice ? item.discountedPrice : item.price
+        ));
+        setPriceRange([0, maxPrice]);
+      }
+    } catch (error) {
+      console.error("Error fetching menu:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const categories = [
-    { id: "all", name: "All Items", emoji: "✨" },
-    { id: "popular", name: "Popular", emoji: "🔥" },
-    { id: "chef-special", name: "Chef's Special", emoji: "👨‍🍳" },
-    { id: "trending", name: "Trending", emoji: "📈" },
-    { id: "bestseller", name: "Bestseller", emoji: "🏆" },
-    { id: "fan-favorite", name: "Fan Favorite", emoji: "❤️" },
+    { id: "all", name: "All Items", emoji: "✨", apiTag: null },
+    { id: "POPULAR", name: "Popular", emoji: "🔥", apiTag: "POPULAR" },
+    { id: "CHEF_SPECIAL", name: "Chef's Special", emoji: "👨‍🍳", apiTag: "CHEF_SPECIAL" },
+    { id: "TRENDING", name: "Trending", emoji: "📈", apiTag: "TRENDING" },
+    { id: "BESTSELLER", name: "Bestseller", emoji: "🏆", apiTag: "BESTSELLER" },
+    { id: "FAN_FAVORITE", name: "Fan Favorite", emoji: "❤️", apiTag: "FAN_FAVORITE" },
   ];
 
   const sortOptions = [
-    { value: "default", label: "Default", icon: ArrowUpDown, emoji: "📌" },
-    { value: "price-asc", label: "Price: Low to High", icon: DollarSign, emoji: "💰⬆️" },
-    { value: "price-desc", label: "Price: High to Low", icon: DollarSign, emoji: "💰⬇️" },
-    { value: "rating-desc", label: "Rating: High to Low", icon: StarIcon, emoji: "⭐⬇️" },
-    { value: "rating-asc", label: "Rating: Low to High", icon: StarIcon, emoji: "⭐⬆️" },
-    { value: "prep-asc", label: "Prep Time: Fastest First", icon: Clock, emoji: "⏱️⬆️" },
-    { value: "prep-desc", label: "Prep Time: Slowest First", icon: Clock, emoji: "⏱️⬇️" },
-    { value: "popularity", label: "Most Popular", icon: Zap, emoji: "🔥" },
+    { value: "default", label: "Default", emoji: "📌" },
+    { value: "price-asc", label: "Price: Low to High", emoji: "💰⬆️" },
+    { value: "price-desc", label: "Price: High to Low", emoji: "💰⬇️" },
+    { value: "rating-desc", label: "Rating: High to Low", emoji: "⭐⬇️" },
+    { value: "rating-asc", label: "Rating: Low to High", emoji: "⭐⬆️" },
+    { value: "prep-asc", label: "Prep Time: Fastest First", emoji: "⏱️⬆️" },
+    { value: "prep-desc", label: "Prep Time: Slowest First", emoji: "⏱️⬇️" },
+    { value: "popularity", label: "Most Popular", emoji: "🔥" },
   ];
 
   const ratingOptions = [0, 4, 4.5, 5];
@@ -58,7 +102,8 @@ export default function MenuPage() {
   const filteredAndSortedItems = useMemo(() => {
     let filtered = menuItems.filter((item) => {
       // Category filter
-      if (selectedCategory !== "all" && item.popularityTag !== selectedCategory) {
+      const selectedCategoryData = categories.find(c => c.id === selectedCategory);
+      if (selectedCategory !== "all" && item.popularityTag !== selectedCategoryData?.apiTag) {
         return false;
       }
       
@@ -111,17 +156,16 @@ export default function MenuPage() {
         filtered.sort((a, b) => b.preparationTime - a.preparationTime);
         break;
       case "popularity":
-        const popularityWeight = {
-          "bestseller": 5,
-          "popular": 4,
-          "chef-special": 4,
-          "trending": 3,
-          "fan-favorite": 3,
-          null: 1
+        const popularityWeight: { [key: string]: number } = {
+          "BESTSELLER": 5,
+          "POPULAR": 4,
+          "CHEF_SPECIAL": 4,
+          "TRENDING": 3,
+          "FAN_FAVORITE": 3,
         };
         filtered.sort((a, b) => {
-          const weightA = a.popularityTag ? popularityWeight[a.popularityTag] : 1;
-          const weightB = b.popularityTag ? popularityWeight[b.popularityTag] : 1;
+          const weightA = a.popularityTag ? popularityWeight[a.popularityTag] || 1 : 1;
+          const weightB = b.popularityTag ? popularityWeight[b.popularityTag] || 1 : 1;
           return weightB - weightA;
         });
         break;
@@ -135,23 +179,48 @@ export default function MenuPage() {
     }
 
     return filtered;
-  }, [selectedCategory, searchTerm, showVegOnly, sortBy, priceRange, selectedRating, maxPrepTime]);
+  }, [menuItems, selectedCategory, searchTerm, showVegOnly, sortBy, priceRange, selectedRating, maxPrepTime]);
 
   const clearAllFilters = () => {
     setSearchTerm("");
     setShowVegOnly(false);
     setSelectedCategory("all");
     setSortBy("default");
-    setPriceRange([0, 5000]);
+    if (menuItems.length > 0) {
+      const maxPrice = Math.max(...menuItems.map(item => 
+        item.isDiscount && item.discountedPrice ? item.discountedPrice : item.price
+      ));
+      setPriceRange([0, maxPrice]);
+    }
     setSelectedRating(0);
     setMaxPrepTime(60);
   };
 
   const getMaxPrice = () => {
+    if (menuItems.length === 0) return 5000;
     return Math.max(...menuItems.map(item => 
       item.isDiscount && item.discountedPrice ? item.discountedPrice : item.price
     ));
   };
+
+  // Show loading state
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <div 
+          className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 flex items-center justify-center"
+          style={{ paddingTop: navbarHeight > 0 ? `${navbarHeight}px` : '80px' }}
+        >
+          <div className="text-center">
+            <Loader2 className="h-12 w-12 animate-spin text-amber-600 mx-auto mb-4" />
+            <p className="text-stone-600 text-lg">Loading our delicious menu... 🍽️</p>
+          </div>
+        </div>
+        <Footer />
+      </>
+    );
+  }
 
   return (
     <>
@@ -444,7 +513,20 @@ export default function MenuPage() {
                 }`}
                 style={{ transitionDelay: `${index * 100}ms` }}
               >
-                <MenuItemCard {...item} index={index} />
+                <MenuItemCard 
+                  id={item.id}
+                  name={item.name}
+                  description={item.description}
+                  price={item.price}
+                  discountedPrice={item.discountedPrice}
+                  isDiscount={item.isDiscount}
+                  preparationTime={item.preparationTime}
+                  popularityTag={item.popularityTag?.toLowerCase() as any || "null"}
+                  rating={item.rating}
+                  isVeg={item.isVeg}
+                  image={item.image || "/placeholder-food.jpg"}
+                  index={index}
+                />
               </div>
             ))}
           </div>
@@ -526,78 +608,3 @@ export default function MenuPage() {
     </>
   );
 }
-
-// API Call Code (commented for now - uncomment when backend is ready)
-/*
-"use client";
-
-import { useState, useEffect, useMemo } from "react";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import MenuItemCard from "@/components/MenuItemCard";
-import { 
-  Sparkles, Flame, Crown, TrendingUp, Heart, Star, 
-  Search, X, Filter, ArrowUpDown, DollarSign, Star as StarIcon,
-  Clock, Zap, ChefHat, Award, ThumbsUp, SlidersHorizontal
-} from "lucide-react";
-
-export default function MenuPage() {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [showVegOnly, setShowVegOnly] = useState(false);
-  const [sortBy, setSortBy] = useState<string>("default");
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 5000]);
-  const [showFilters, setShowFilters] = useState(false);
-  const [selectedRating, setSelectedRating] = useState<number>(0);
-  const [maxPrepTime, setMaxPrepTime] = useState<number>(60);
-  const [menuItems, setMenuItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [navbarHeight, setNavbarHeight] = useState(0);
-
-  useEffect(() => {
-    setIsLoaded(true);
-    
-    // Get navbar height
-    const navbar = document.querySelector('nav');
-    if (navbar) {
-      setNavbarHeight(navbar.offsetHeight);
-    }
-    
-    // Fetch menu items from API
-    fetch("/api/menu")
-      .then(res => res.json())
-      .then(data => {
-        setMenuItems(data);
-        // Set max price range based on actual data
-        const maxPrice = Math.max(...data.map(item => 
-          item.isDiscount && item.discountedPrice ? item.discountedPrice : item.price
-        ));
-        setPriceRange([0, maxPrice]);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Error fetching menu:", err);
-        setLoading(false);
-      });
-  }, []);
-
-  if (loading) {
-    return (
-      <>
-        <Navbar />
-        <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 flex items-center justify-center">
-          <div className="text-center">
-            <div className="text-6xl animate-bounce mb-4">🍽️</div>
-            <p className="text-stone-600 text-lg">Loading our delicious menu...</p>
-          </div>
-        </div>
-      </>
-    );
-  }
-
-  // ... rest of the component logic (same as above with menuItems from state)
-  
-  // Note: Make sure to use menuItems from state instead of imported menuItems
-}
-*/
