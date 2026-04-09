@@ -258,6 +258,7 @@ model Payment {
 
 enum PaymentMethod {
   CASH_ON_DELIVERY
+  KHALTI
   CREDIT_CARD
   DEBIT_CARD
   UPI
