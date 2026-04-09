@@ -258,10 +258,12 @@ export default function CartPage() {
                 )}
 
                 {/* Checkout Button */}
-                <button className="w-full bg-gradient-to-r from-amber-600 to-orange-600 text-white py-3 rounded-full font-semibold hover:scale-105 transition-all duration-300 shadow-lg mb-3 flex items-center justify-center gap-2">
-                  <CreditCard className="h-5 w-5" />
-                  Proceed to Checkout
-                </button>
+                <Link href="/checkout">
+                  <button className="w-full bg-gradient-to-r from-amber-600 to-orange-600 text-white py-3 rounded-full font-semibold hover:scale-105 transition-all duration-300 shadow-lg mb-3 flex items-center justify-center gap-2">
+                    <CreditCard className="h-5 w-5" />
+                    Proceed to Checkout
+                  </button>
+                </Link>
 
                 {/* Continue Shopping */}
                 <Link href="/offers">
