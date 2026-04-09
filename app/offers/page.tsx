@@ -1,18 +1,34 @@
-// app/offers/page.tsx - Discount Tag Next to Price
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { menuItems } from "@/data/menuData";
 import OfferItem from "@/components/card/OfferItem";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, Loader2 } from "lucide-react";
+
+interface MenuItem {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  discountedPrice?: number;
+  isDiscount: boolean;
+  preparationTime: number;
+  popularityTag: string | null;
+  rating: number;
+  isVeg: boolean;
+  image: string | null;
+  isAvailable: boolean;
+  slug: string;
+}
 
 export default function OffersPage() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("default");
   const [navbarHeight, setNavbarHeight] = useState(0);
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setIsLoaded(true);
@@ -21,20 +37,40 @@ export default function OffersPage() {
     if (navbar) {
       setNavbarHeight(navbar.offsetHeight);
     }
+    
+    // Fetch menu items from API
+    fetchMenuItems();
   }, []);
 
-  // Filter only items with discount
+  const fetchMenuItems = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch("/api/admin/menu");
+      if (!response.ok) throw new Error("Failed to fetch menu");
+      const data = await response.json();
+      
+      // Filter only available items with discounts
+      const availableItems = data.filter((item: MenuItem) => item.isAvailable && item.isDiscount === true);
+      setMenuItems(availableItems);
+    } catch (error) {
+      console.error("Error fetching menu:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Filter only items with discount (already filtered in fetch, but keeping for consistency)
   const offerItems = useMemo(() => {
     return menuItems.filter(item => item.isDiscount === true && item.discountedPrice);
-  }, []);
+  }, [menuItems]);
 
   const categories = [
-    { id: "all", name: "All Offers", emoji: "🎁" },
-    { id: "popular", name: "Popular", emoji: "🔥" },
-    { id: "chef-special", name: "Chef's Special", emoji: "👨‍🍳" },
-    { id: "trending", name: "Trending", emoji: "📈" },
-    { id: "bestseller", name: "Bestseller", emoji: "🏆" },
-    { id: "fan-favorite", name: "Fan Favorite", emoji: "❤️" },
+    { id: "all", name: "All Offers", emoji: "🎁", apiTag: null },
+    { id: "POPULAR", name: "Popular", emoji: "🔥", apiTag: "POPULAR" },
+    { id: "CHEF_SPECIAL", name: "Chef's Special", emoji: "👨‍🍳", apiTag: "CHEF_SPECIAL" },
+    { id: "TRENDING", name: "Trending", emoji: "📈", apiTag: "TRENDING" },
+    { id: "BESTSELLER", name: "Bestseller", emoji: "🏆", apiTag: "BESTSELLER" },
+    { id: "FAN_FAVORITE", name: "Fan Favorite", emoji: "❤️", apiTag: "FAN_FAVORITE" },
   ];
 
   const sortOptions = [
@@ -48,7 +84,8 @@ export default function OffersPage() {
   const filteredAndSortedItems = useMemo(() => {
     let filtered = offerItems.filter((item) => {
       // Category filter
-      if (selectedCategory !== "all" && item.popularityTag !== selectedCategory) {
+      const selectedCategoryData = categories.find(c => c.id === selectedCategory);
+      if (selectedCategory !== "all" && item.popularityTag !== selectedCategoryData?.apiTag) {
         return false;
       }
       return true;
@@ -97,6 +134,25 @@ export default function OffersPage() {
     }, 0);
     return (totalDiscountPercent / offerItems.length).toFixed(1);
   };
+
+  // Show loading state
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <div 
+          className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-amber-50 flex items-center justify-center"
+          style={{ paddingTop: navbarHeight > 0 ? `${navbarHeight}px` : '80px' }}
+        >
+          <div className="text-center">
+            <Loader2 className="h-12 w-12 animate-spin text-orange-600 mx-auto mb-4" />
+            <p className="text-stone-600 text-lg">Loading amazing offers... 🎁</p>
+          </div>
+        </div>
+        <Footer />
+      </>
+    );
+  }
 
   return (
     <>
@@ -209,7 +265,20 @@ export default function OffersPage() {
                 }`}
                 style={{ transitionDelay: `${index * 100}ms` }}
               >
-                <OfferItem {...item} index={index} />
+                <OfferItem 
+                  id={item.id}
+                  name={item.name}
+                  description={item.description}
+                  price={item.price}
+                  discountedPrice={item.discountedPrice}
+                  isDiscount={item.isDiscount}
+                  preparationTime={item.preparationTime}
+                  popularityTag={item.popularityTag?.toLowerCase() as any || null}
+                  rating={item.rating}
+                  isVeg={item.isVeg}
+                  image={item.image || "/placeholder-food.jpg"}
+                  index={index}
+                />
               </div>
             ))}
           </div>
