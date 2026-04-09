@@ -3,25 +3,32 @@
 import Link from "next/link"
 import Image from "next/image"
 import { useState, useEffect } from "react"
-import { Menu, X, ChevronDown, User, ShoppingCart  } from "lucide-react"
+import { Menu, X, ChevronDown, User, ShoppingCart } from "lucide-react"
 import type { User as UserType } from "@/generated/prisma/client"
 
 type User = Omit<UserType, "password" | "createdAt" | "updatedAt">
 
 interface MenuItem {
   id: string;
-  title: string;
-  slug?: string;
+  name: string;
+  title?: string;
+  slug: string;
   description?: string;
   price?: number;
+  isDiscount?: boolean;
+  discountedPrice?: number;
 }
 
 interface OfferItem {
   id: string;
-  title: string;
-  slug?: string;
+  name: string;
+  title?: string;
+  slug: string;
   description?: string;
   discount?: number;
+  price?: number;
+  discountedPrice?: number;
+  isDiscount?: boolean;
 }
 
 export default function Navbar() {
@@ -54,23 +61,60 @@ export default function Navbar() {
 
     const loadPreviewOffers = async () => {
       try {
-        const res = await fetch("/api/offers")
+        const res = await fetch("/api/admin/menu")
         if (!res.ok) return
         const data = await res.json()
-        setPreviewOffers(Array.isArray(data) ? data.slice(0, 10) : [])
+        
+        // Filter only discounted and available items for offers
+        const discountedItems = data.filter((item: any) => 
+          item.isDiscount === true && 
+          item.discountedPrice && 
+          item.isAvailable === true
+        ).slice(0, 10)
+        
+        // Transform to match OfferItem interface
+        const transformedOffers = discountedItems.map((item: any) => ({
+          id: item.id,
+          name: item.name,
+          title: item.name,
+          slug: item.slug,
+          description: item.description,
+          discount: Math.round(((item.price - item.discountedPrice) / item.price) * 100),
+          price: item.price,
+          discountedPrice: item.discountedPrice,
+          isDiscount: item.isDiscount,
+        }))
+        
+        setPreviewOffers(transformedOffers)
       } catch (err) {
-        console.error("[moodmeals] Failed to load offers preview")
+        console.error("[moodmeals] Failed to load offers preview", err)
       }
     }
 
     const loadPreviewMenu = async () => {
       try {
-        const res = await fetch("/api/menu")
+        const res = await fetch("/api/admin/menu")
         if (!res.ok) return
         const data = await res.json()
-        setPreviewMenu(Array.isArray(data) ? data.slice(0, 10) : [])
+        
+        // Filter only available items for menu
+        const availableItems = data.filter((item: any) => item.isAvailable === true).slice(0, 10)
+        
+        // Transform to match MenuItem interface
+        const transformedMenu = availableItems.map((item: any) => ({
+          id: item.id,
+          name: item.name,
+          title: item.name,
+          slug: item.slug,
+          description: item.description,
+          price: item.isDiscount && item.discountedPrice ? item.discountedPrice : item.price,
+          isDiscount: item.isDiscount,
+          discountedPrice: item.discountedPrice,
+        }))
+        
+        setPreviewMenu(transformedMenu)
       } catch (err) {
-        console.error("[moodmeals] Failed to load menu preview")
+        console.error("[moodmeals] Failed to load menu preview", err)
       }
     }
 
@@ -139,10 +183,15 @@ export default function Navbar() {
                     previewOffers.map((item: OfferItem) => (
                       <Link
                         key={item.id}
-                        href={`/offers/${item.slug || item.id}`}
-                        className="text-sm text-stone-600 hover:text-amber-600 py-1 truncate"
+                        href={`/offers/${item.slug}`}
+                        className="text-sm text-stone-600 hover:text-amber-600 py-1 truncate flex items-center justify-between gap-2"
                       >
-                        {item.title}
+                        <span className="truncate">{item.name}</span>
+                        {item.discount && (
+                          <span className="text-xs font-semibold text-green-600 shrink-0">
+                            {item.discount}% OFF
+                          </span>
+                        )}
                       </Link>
                     ))
                   )}
@@ -175,10 +224,10 @@ export default function Navbar() {
                     previewMenu.map((item: MenuItem) => (
                       <Link
                         key={item.id}
-                        href={`/menu/${item.slug || item.id}`}
+                        href={`/menu/${item.slug}`}
                         className="text-sm text-stone-600 hover:text-amber-600 py-1 truncate"
                       >
-                        {item.title}
+                        {item.name}
                       </Link>
                     ))
                   )}
@@ -204,7 +253,7 @@ export default function Navbar() {
                   <div className="flex items-center space-x-6">
                     {/* Cart Icon */}
                     <Link href="/cart" className="text-stone-600 hover:text-amber-600 transition-colors">
-                      <ShoppingCart  className="h-6 w-6" />
+                      <ShoppingCart className="h-6 w-6" />
                     </Link>
 
                     {/* User Dropdown */}
@@ -288,11 +337,16 @@ export default function Navbar() {
                   previewOffers.map((item: OfferItem) => (
                     <Link
                       key={item.id}
-                      href={`/offers/${item.slug || item.id}`}
-                      className="block px-3 py-2 text-sm text-stone-700 hover:text-amber-600"
+                      href={`/offers/${item.slug}`}
+                      className="flex items-center justify-between px-3 py-2 text-sm text-stone-700 hover:text-amber-600"
                       onClick={() => setIsOpen(false)}
                     >
-                      {item.title}
+                      <span className="truncate">{item.name}</span>
+                      {item.discount && (
+                        <span className="text-xs font-semibold text-green-600 ml-2 shrink-0">
+                          {item.discount}% OFF
+                        </span>
+                      )}
                     </Link>
                   ))
                 )}
@@ -320,11 +374,11 @@ export default function Navbar() {
                   previewMenu.map((item: MenuItem) => (
                     <Link
                       key={item.id}
-                      href={`/menu/${item.slug || item.id}`}
+                      href={`/menu/${item.slug}`}
                       className="block px-3 py-2 text-sm text-stone-700 hover:text-amber-600"
                       onClick={() => setIsOpen(false)}
                     >
-                      {item.title}
+                      {item.name}
                     </Link>
                   ))
                 )}
@@ -349,7 +403,7 @@ export default function Navbar() {
                   className="flex items-center space-x-2 text-stone-900 font-medium py-2"
                   onClick={() => setIsOpen(false)}
                 >
-                  <ShoppingCart  className="h-5 w-5 text-amber-600" />
+                  <ShoppingCart className="h-5 w-5 text-amber-600" />
                   <span>My Cart</span>
                 </Link>
 
