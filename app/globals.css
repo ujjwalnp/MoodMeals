@@ -3,6 +3,9 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  /* Specific colors for form elements */
+  --input-text: #1c1917; 
+  --input-placeholder: #78716c;
 }
 
 @theme inline {
@@ -16,6 +19,9 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    /* We keep input text dark because your cards are 'bg-white' */
+    --input-text: #1c1917; 
+    --input-placeholder: #78716c;
   }
 }
 
@@ -58,5 +64,26 @@ body {
   100% {
     opacity: 0;
     transform: translateY(16px);
+  }
+}
+
+/* --- THE PERMANENT FIX FOR INPUTS --- */
+@layer base {
+  input, 
+  textarea, 
+  select {
+    color: var(--input-text) !important;
+  }
+
+  input::placeholder, 
+  textarea::placeholder {
+    color: var(--input-placeholder) !important;
+    opacity: 1 !important; /* Prevents Firefox from dimming it further */
+  }
+  
+  /* This ensures the 'options' inside your select dropdown are readable */
+  option {
+    color: #1c1917;
+    background-color: #ffffff;
   }
 }
