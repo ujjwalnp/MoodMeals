@@ -74,8 +74,8 @@ export default function MenuItemCard({
     setQuantity(quantity + 1)
   }
 
-  const handleAddToCart = () => {
-    addToCart(id, name, quantity, finalPrice)
+  const handleAddToCart = async () => {
+    await addToCart(id, name, quantity, finalPrice, image, description)
     setQuantity(1)
   }
 

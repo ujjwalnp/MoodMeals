@@ -17,11 +17,12 @@ import {
   ArrowLeft,
   Gift,
   Sparkles,
-  ShieldCheck
+  ShieldCheck,
+  Loader2
 } from "lucide-react";
 
 export default function CartPage() {
-  const { cart, updateQuantity, removeFromCart, clearCart } = useCart();
+  const { cart, updateQuantity, removeFromCart, clearCart, isLoading, getCartCount, getCartTotal } = useCart();
   const [navbarHeight, setNavbarHeight] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -34,7 +35,7 @@ export default function CartPage() {
   }, []);
 
   // Calculate subtotal
-  const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+  const subtotal = getCartTotal();
   
   // Calculate delivery fee (free for orders above NPR 1000)
   const deliveryFee = subtotal >= 1000 ? 0 : 100;
@@ -46,6 +47,25 @@ export default function CartPage() {
   const formatCurrency = (amount: number) => {
     return `NPR ${amount.toFixed(2)}`;
   };
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <>
+        <Navbar />
+        <div 
+          className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-amber-50 flex items-center justify-center"
+          style={{ paddingTop: navbarHeight > 0 ? `${navbarHeight}px` : '80px' }}
+        >
+          <div className="text-center">
+            <Loader2 className="h-12 w-12 animate-spin text-amber-600 mx-auto mb-4" />
+            <p className="text-stone-600 text-lg">Loading your cart... 🛒</p>
+          </div>
+        </div>
+        <Footer />
+      </>
+    );
+  }
 
   return (
     <>
@@ -76,7 +96,7 @@ export default function CartPage() {
             <p className="text-lg text-stone-600 max-w-2xl mx-auto">
               {cart.length === 0 
                 ? "Your cart is empty. Let's fill it with something delicious!" 
-                : `You have ${cart.reduce((count, item) => count + item.quantity, 0)} item${cart.reduce((count, item) => count + item.quantity, 0) > 1 ? 's' : ''} in your cart`
+                : `You have ${getCartCount()} item${getCartCount() > 1 ? 's' : ''} in your cart`
               }
             </p>
           </div>
@@ -120,6 +140,7 @@ export default function CartPage() {
                           alt={item.name}
                           fill
                           className="object-cover"
+                          sizes="96px"
                         />
                       </div>
 

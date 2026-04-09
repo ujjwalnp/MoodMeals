@@ -38,8 +38,8 @@ export default function OfferItem(props: OfferItemProps) {
     setQuantity(quantity + 1);
   };
 
-  const handleAddToCart = () => {
-    addToCart(props.id, props.name, quantity, finalPrice);
+  const handleAddToCart = async () => {
+    await addToCart(props.id, props.name, quantity, finalPrice, props.image, props.description);
     setQuantity(1); // Reset quantity after adding to cart
   };
 
