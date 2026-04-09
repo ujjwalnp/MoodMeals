@@ -138,6 +138,7 @@ export default function CheckoutPage() {
     return `NPR ${amount.toFixed(2)}`;
   };
 
+  // Replace the handlePlaceOrder function in checkout/page.tsx
   const handlePlaceOrder = async () => {
     if (!selectedAddress) {
       alert("Please select a delivery address");
@@ -184,7 +185,7 @@ export default function CheckoutPage() {
         await clearCart();
         window.location.href = `/order-confirmation?orderId=${data.order.id}`;
       } else if (paymentMethod === "khalti") {
-        // Redirect to Khalti payment
+        // For Khalti, redirect to payment page
         window.location.href = `/payment/khalti?orderId=${data.order.id}`;
       }
     } catch (error) {
