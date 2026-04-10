@@ -273,7 +273,7 @@ export default function Navbar() {
                         <Link href="/orders" className="block px-4 py-2 text-sm text-stone-600 hover:bg-stone-50 hover:text-amber-600">
                           My Orders
                         </Link>
-                        <Link href="/orders/track" className="block px-4 py-2 text-sm text-stone-600 hover:bg-stone-50 hover:text-amber-600">
+                        <Link href="/orders" className="block px-4 py-2 text-sm text-stone-600 hover:bg-stone-50 hover:text-amber-600">
                           Track Orders
                         </Link>
                         <hr className="my-1 border-stone-100" />
